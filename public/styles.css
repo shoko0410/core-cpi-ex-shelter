@@ -1,0 +1,422 @@
+/* Palette roles from the dataviz reference instance. Light and dark are both
+   selected sets, not an automatic flip. Validated with validate_palette.js:
+   light + dark ALL CHECKS PASS; light aqua/yellow sit below 3:1, which the
+   relief rule covers via visible end-labels and the table view. */
+:root {
+  color-scheme: light;
+
+  --surface-1: #fcfcfb;
+  --page: #f9f9f7;
+  --text-primary: #0b0b0b;
+  --text-secondary: #52514e;
+  --text-muted: #898781;
+  --gridline: #e1e0d9;
+  --baseline: #c3c2b7;
+  --border: rgba(11, 11, 11, 0.1);
+  --success: #006300;
+  --critical: #d03b3b;
+
+  --series-coreExShelter: #2a78d6; /* slot 1 — the headline metric */
+  --series-headline: #eb6834; /* slot 2 */
+  --series-core: #1baf7a; /* slot 3 */
+  --series-shelter: #eda100; /* slot 4 */
+  --series-stickyExShelter: #e87ba4; /* slot 5 */
+  --series-ann3m: #2a78d6;
+  --series-ann6m: #eb6834;
+  --series-stickyAnn3m: #1baf7a;
+
+  --recession-band: rgba(11, 11, 11, 0.055);
+  --gap-band: rgba(208, 59, 59, 0.1);
+  --hover-wash: rgba(11, 11, 11, 0.04);
+
+  --radius: 10px;
+  --font: system-ui, -apple-system, "Segoe UI", "Malgun Gothic", "Apple SD Gothic Neo",
+    sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:where(:not([data-theme="light"])) {
+    color-scheme: dark;
+    --surface-1: #1a1a19;
+    --page: #0d0d0d;
+    --text-primary: #ffffff;
+    --text-secondary: #c3c2b7;
+    --text-muted: #898781;
+    --gridline: #2c2c2a;
+    --baseline: #383835;
+    --border: rgba(255, 255, 255, 0.1);
+    --success: #0ca30c;
+    --critical: #e66767;
+
+    --series-coreExShelter: #3987e5;
+    --series-headline: #d95926;
+    --series-core: #199e70;
+    --series-shelter: #c98500;
+    --series-stickyExShelter: #d55181;
+    --series-ann3m: #3987e5;
+    --series-ann6m: #d95926;
+    --series-stickyAnn3m: #199e70;
+
+    --recession-band: rgba(255, 255, 255, 0.07);
+    --gap-band: rgba(230, 103, 103, 0.14);
+    --hover-wash: rgba(255, 255, 255, 0.06);
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --surface-1: #1a1a19;
+  --page: #0d0d0d;
+  --text-primary: #ffffff;
+  --text-secondary: #c3c2b7;
+  --text-muted: #898781;
+  --gridline: #2c2c2a;
+  --baseline: #383835;
+  --border: rgba(255, 255, 255, 0.1);
+  --success: #0ca30c;
+  --critical: #e66767;
+
+  --series-coreExShelter: #3987e5;
+  --series-headline: #d95926;
+  --series-core: #199e70;
+  --series-shelter: #c98500;
+  --series-stickyExShelter: #d55181;
+  --series-ann3m: #3987e5;
+  --series-ann6m: #d95926;
+  --series-stickyAnn3m: #199e70;
+
+  --recession-band: rgba(255, 255, 255, 0.07);
+  --gap-band: rgba(230, 103, 103, 0.14);
+  --hover-wash: rgba(255, 255, 255, 0.06);
+}
+
+* { box-sizing: border-box; }
+
+html, body { margin: 0; padding: 0; }
+
+body {
+  background: var(--page);
+  color: var(--text-primary);
+  font-family: var(--font);
+  font-size: 15px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  /* Korean wraps mid-word by default, which breaks terms like "때문에" across
+     lines; keep-all wraps on spaces instead. */
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
+/* Fluid: the page tracks the window at every width. Prose blocks keep their own
+   readable measure below (a 2000px-wide paragraph is unreadable), but charts and
+   tables are free to use the whole window. */
+.wrap {
+  width: 100%;
+  margin: 0 auto;
+  padding: clamp(20px, 2.4vw, 40px) clamp(14px, 3vw, 56px) 72px;
+}
+
+/* ------------------------------------------------------------- header */
+
+.masthead {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 24px;
+  margin-bottom: 28px;
+}
+
+h1 {
+  font-size: clamp(21px, 2.1vw, 32px);
+  line-height: 1.25;
+  margin: 0 0 6px;
+  letter-spacing: -0.015em;
+}
+
+/* Prose measure in px, not ch: a `ch` is the width of "0", so a ch-based cap is
+   roughly half as wide as intended once the text is Korean. */
+.subtitle {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 14px;
+  max-width: min(100%, 780px);
+}
+
+.icon-btn {
+  flex: none;
+  background: var(--surface-1);
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 7px 12px;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+.icon-btn:hover { background: var(--hover-wash); color: var(--text-primary); }
+.icon-btn:focus-visible { outline: 2px solid var(--series-coreExShelter); outline-offset: 2px; }
+
+/* ------------------------------------------------------------- hero + tiles */
+
+.hero {
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 22px 24px;
+  margin-bottom: 12px;
+}
+
+.hero-label {
+  color: var(--text-secondary);
+  font-size: 13px;
+  margin: 0 0 2px;
+}
+
+.hero-figure {
+  font-size: clamp(40px, 4.4vw, 72px);
+  font-weight: 600;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  /* Proportional figures: tabular-nums makes a large standalone number look loose. */
+}
+
+.hero-row { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
+
+.hero-meta { color: var(--text-secondary); font-size: 13px; }
+
+.delta { font-size: 14px; font-weight: 600; }
+.delta.up { color: var(--critical); }   /* rising inflation reads as the bad direction */
+.delta.down { color: var(--success); }
+.delta.flat { color: var(--text-secondary); }
+
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.tile {
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+}
+
+.tile-label { color: var(--text-secondary); font-size: 12.5px; margin-bottom: 4px; }
+.tile-value { font-size: 24px; font-weight: 600; letter-spacing: -0.02em; }
+.tile-note { color: var(--text-muted); font-size: 12px; margin-top: 2px; }
+
+/* ------------------------------------------------------------- filter row */
+
+/* One row, above everything it scopes. Never inside a chart card. */
+.filters {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+
+.filter-label { color: var(--text-secondary); font-size: 13px; margin-right: 2px; }
+
+.seg {
+  display: inline-flex;
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.seg button {
+  background: none;
+  border: none;
+  border-right: 1px solid var(--border);
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: 13px;
+  padding: 7px 13px;
+  cursor: pointer;
+}
+.seg button:last-child { border-right: none; }
+.seg button:hover { background: var(--hover-wash); color: var(--text-primary); }
+.seg button[aria-pressed="true"] {
+  background: var(--text-primary);
+  color: var(--surface-1);
+  font-weight: 600;
+}
+.seg button:focus-visible { outline: 2px solid var(--series-coreExShelter); outline-offset: -2px; }
+
+/* ------------------------------------------------------------- chart card */
+
+.card {
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px 22px 16px;
+  margin-bottom: 18px;
+}
+
+.card-head { margin-bottom: 4px; }
+.card h2 { font-size: 16px; margin: 0 0 3px; letter-spacing: -0.01em; }
+.card-sub { color: var(--text-secondary); font-size: 13px; margin: 0; max-width: min(100%, 860px); }
+
+/* Legend is always present for >= 2 series — identity is never color-alone. */
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 4px;
+  margin: 14px 0 2px;
+}
+
+.legend button {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: 13px;
+  padding: 4px 9px 4px 7px;
+  cursor: pointer;
+}
+.legend button:hover { background: var(--hover-wash); }
+.legend button:focus-visible { outline: 2px solid var(--series-coreExShelter); outline-offset: 1px; }
+.legend button[aria-pressed="false"] { color: var(--text-muted); }
+.legend button[aria-pressed="false"] .legend-key { opacity: 0.3; }
+.legend button[aria-pressed="true"] { color: var(--text-primary); }
+
+/* Legends mirror the mark: a line key for lines. */
+.legend-key {
+  width: 16px;
+  height: 2px;
+  border-radius: 1px;
+  flex: none;
+  background: currentColor;
+}
+
+.chart-host { position: relative; width: 100%; }
+.chart-host svg { display: block; width: 100%; overflow: visible; }
+.chart-host:focus-visible { outline: 2px solid var(--series-coreExShelter); outline-offset: 3px; border-radius: 4px; }
+
+/* ------------------------------------------------------------- tooltip */
+
+.tip {
+  position: absolute;
+  z-index: 5;
+  min-width: 168px;
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.14);
+  padding: 9px 11px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 90ms ease;
+}
+.tip[data-show="true"] { opacity: 1; }
+
+.tip-date {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+  font-variant-numeric: tabular-nums;
+}
+
+.tip-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 2px 0;
+}
+
+.tip-key { width: 12px; height: 2px; border-radius: 1px; flex: none; }
+
+/* Values lead, labels follow — the reader has the series and wants the number. */
+.tip-val {
+  font-weight: 600;
+  font-size: 13.5px;
+  font-variant-numeric: tabular-nums;
+  min-width: 54px;
+  text-align: right;
+  color: var(--text-primary);
+}
+.tip-name { font-size: 12.5px; color: var(--text-secondary); }
+.tip-missing { font-size: 12.5px; color: var(--critical); margin-top: 4px; }
+
+/* ------------------------------------------------------------- table view */
+
+.table-wrap {
+  margin-top: 14px;
+  border-top: 1px solid var(--border);
+  padding-top: 12px;
+  max-height: 380px;
+  overflow: auto;
+}
+
+table { border-collapse: collapse; width: 100%; font-size: 13px; }
+caption { text-align: left; color: var(--text-secondary); font-size: 12.5px; padding-bottom: 8px; }
+
+th, td {
+  text-align: right;
+  padding: 5px 10px;
+  border-bottom: 1px solid var(--gridline);
+  font-variant-numeric: tabular-nums;
+}
+th:first-child, td:first-child { text-align: left; }
+thead th {
+  position: sticky;
+  top: 0;
+  background: var(--surface-1);
+  color: var(--text-secondary);
+  font-weight: 600;
+  z-index: 1;
+}
+tbody tr:hover { background: var(--hover-wash); }
+td.na { color: var(--text-muted); }
+
+/* ------------------------------------------------------------- notes */
+
+.notes {
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px 22px;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+.notes h2 { font-size: 14px; color: var(--text-primary); margin: 0 0 8px; }
+.notes ul { margin: 0; padding-left: 18px; }
+.notes li { margin-bottom: 7px; max-width: min(100%, 920px); }
+.notes code {
+  font-size: 12px;
+  background: var(--hover-wash);
+  padding: 1px 5px;
+  border-radius: 4px;
+}
+.notes a { color: inherit; }
+
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Padding and type sizes are already fluid via clamp(); at phone widths the only
+   thing left to fix is the masthead, which runs out of room for a side-by-side
+   title and toggle. */
+@media (max-width: 560px) {
+  .masthead { flex-direction: column-reverse; align-items: stretch; gap: 12px; }
+  .masthead .icon-btn { align-self: flex-end; }
+  .table-wrap { max-height: 300px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; }
+}

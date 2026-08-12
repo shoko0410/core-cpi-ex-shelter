@@ -1,0 +1,12 @@
+{
+  "name": "core-cpi-ex-shelter",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Core CPI ex-shelter historical trend viewer (BLS primary, FRED fallback)",
+  "type": "module",
+  "scripts": {
+    "fetch": "node scripts/fetch-data.mjs",
+    "start": "node scripts/serve.mjs",
+    "build": "npm run fetch"
+  }
+}

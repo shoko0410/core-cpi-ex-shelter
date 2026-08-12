@@ -1,0 +1,3 @@
+# Normalise to LF in the repository so a Windows checkout and the Linux CI runner
+# don't produce spurious whole-file diffs.
+* text=auto eol=lf

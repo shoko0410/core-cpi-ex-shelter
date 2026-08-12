@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Core CPI ex-Shelter — 미국 주거비 제외 근원물가 추이</title>
+<meta name="description" content="1968년부터 현재까지 미국 주거비 제외 근원 소비자물가(CPI less food, shelter, and energy) 전년 대비 상승률 추이. 출처 BLS.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%232a78d6'/%3E%3Cpath d='M5 22 L12 13 L18 18 L27 7' stroke='white' stroke-width='3' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="wrap">
+
+  <header class="masthead">
+    <div>
+      <h1>Core CPI ex-Shelter</h1>
+      <p class="subtitle">
+        미국 소비자물가에서 <strong>식료품·에너지·주거비</strong>를 제외한 근원물가의 전년 대비 상승률입니다.
+        주거비는 시장 임대료를 1년 이상 시차를 두고 반영하기 때문에, 이 지표는 물가의 방향 전환을
+        헤드라인이나 일반 Core CPI보다 먼저 보여주는 경우가 많습니다.
+      </p>
+    </div>
+    <button class="icon-btn" id="theme-toggle" type="button" aria-live="polite">🌙 다크</button>
+  </header>
+
+  <section class="hero" aria-labelledby="hero-label">
+    <p class="hero-label" id="hero-label">Core ex-주거비 · 전년 대비</p>
+    <div class="hero-row">
+      <span class="hero-figure" id="hero-value">—</span>
+      <span class="delta" id="hero-delta"></span>
+      <span class="hero-meta" id="hero-meta"></span>
+    </div>
+  </section>
+
+  <section class="tiles" id="tiles" aria-label="주요 지표 요약"></section>
+
+  <!-- One filter row, scoping every chart, stat and table below it. -->
+  <div class="filters" role="group" aria-label="기간 필터">
+    <span class="filter-label">기간</span>
+    <div class="seg" id="range-seg"></div>
+  </div>
+
+  <section class="card">
+    <div class="card-head">
+      <h2>전년 대비 상승률 (YoY)</h2>
+      <p class="card-sub">
+        BLS 4개 계열은 계절조정 전(NSA) 지수 기준이고, Sticky 계열만 애틀랜타 연준이 계절조정(SA)
+        기준으로 발표한 값을 그대로 쓴 것입니다. 회색 띠는 NBER 경기침체 구간, 가로 기준선은
+        연준 목표 2%입니다. 범례를 눌러 계열을 켜고 끌 수 있습니다.
+      </p>
+    </div>
+    <div class="legend" id="legend-yoy" role="group" aria-label="계열 표시 전환"></div>
+    <div class="chart-host" id="chart-yoy" tabindex="0" role="img"
+         aria-label="주거비 제외 근원물가, 헤드라인 CPI, Core CPI, 주거비의 전년 대비 상승률 추이 선그래프"></div>
+  </section>
+
+  <section class="card">
+    <div class="card-head">
+      <h2>단기 모멘텀 — 3개월 · 6개월 연율화</h2>
+      <p class="card-sub">
+        계절조정(SA) 지수로 계산한 Core ex-주거비의 최근 변화를 연율로 환산한 값입니다.
+        전년 대비보다 추세 전환을 몇 달 빠르게 보여주지만 그만큼 진폭이 큽니다.
+        Sticky 3개월 연율은 애틀랜타 연준이 직접 발표하는 3개월 연율화 계열입니다.
+      </p>
+    </div>
+    <div class="legend" id="legend-mom" role="group" aria-label="계열 표시 전환"></div>
+    <div class="chart-host" id="chart-mom" tabindex="0" role="img"
+         aria-label="주거비 제외 근원물가의 3개월 및 6개월 연율화 상승률 추이 선그래프"></div>
+  </section>
+
+  <section class="card">
+    <div class="card-head" style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px;">
+      <div>
+        <h2>데이터 테이블</h2>
+        <p class="card-sub">차트의 모든 값을 숫자로 확인할 수 있습니다. 최근 데이터가 위쪽입니다.</p>
+      </div>
+      <button class="icon-btn" id="table-toggle" type="button" aria-expanded="false" aria-controls="table-wrap">
+        표 열기
+      </button>
+    </div>
+    <div class="table-wrap" id="table-wrap" hidden></div>
+  </section>
+
+  <section class="notes">
+    <h2>읽을 때 주의할 점</h2>
+    <ul>
+      <li>
+        <strong>1983년 주거비 산정 방식 변경.</strong> 1983년 1월 이전 CPI의 주거비 항목은
+        주택 가격과 모기지 이자를 직접 포함했고, 그 이후로는 자가주거비 등가임대료(OER)로 바뀌었습니다.
+        그래서 1970~80년대 초의 주거비 계열과 "주거비 제외" 지표는 현재와 같은 기준으로 비교할 수 없습니다.
+        이 지표의 최고점이 1980년이 아니라 1975년 2월에 찍힌 것도 이 때문입니다 — 1980년 물가 급등분의
+        상당 부분이 당시 정의의 주거비와 에너지에 몰려 있었습니다.
+      </li>
+      <li>
+        <strong>Sticky CPI는 "빼는" 지표가 아니라 "가중치를 다시 주는" 지표입니다.</strong>
+        애틀랜타 연준은 CPI 구성 항목을 가격이 얼마나 자주 바뀌는지로 나눠, 잘 안 변하는
+        (평균 4.3개월 이상 고정) 항목에 가중치를 몰아준 지수를 따로 계산합니다. 여기 올린 것은
+        그중 식료품·에너지·주거비를 뺀 버전이라 이 사이트의 핵심 지표와 대상 범위가 같고,
+        차이는 오직 가중 방식입니다. 끈적한 가격은 기업이 미래 물가를 어떻게 볼지를 반영해
+        정해진다고 보기 때문에 기조적 인플레이션 지표로 자주 인용됩니다.
+      </li>
+      <li>
+        <strong>2025년 10월 데이터는 존재하지 않습니다.</strong> 연방정부 셧다운(lapse in appropriations)으로
+        해당 월 조사가 이루어지지 않았습니다. 없는 값을 보간하지 않고 선을 끊어서 표시했으며,
+        이 결측은 3개월·6개월 연율화 계산에도 전파되어 일부 월이 비어 있습니다.
+        <strong>단, Sticky 계열은 이 달에도 값이 있습니다</strong> — BLS가 발표하지 않은 달인데
+        FRED에는 애틀랜타 연준 값(2.70%)이 실려 있어서, 차트에서 Sticky 선만 끊기지 않고 이어집니다.
+        임의로 지우지 않고 발표된 그대로 뒀으니 그 달 Sticky 값은 감안해서 보시기 바랍니다.
+      </li>
+      <li>
+        <strong>YoY는 NSA, 연율화는 SA.</strong> 전년 동월 대비는 계절 요인이 자연히 상쇄되므로
+        계절조정 전 지수를 쓰고, 3·6개월 변화는 계절조정 지수를 써야 계절성이 추세로 오독되지 않습니다.
+      </li>
+      <li>
+        <strong>출처.</strong> BLS 물가 계열 4종은 노동통계국 Public Data API
+        (<code>CUUR0000SA0L12E</code> 외)에서 직접 받았습니다. FRED에는
+        "less food, shelter, and energy" 계열이 없어서 이 지표는 BLS가 유일한 출처입니다.
+        반대로 Sticky 계열은 BLS가 만들지 않으므로 FRED에서만 받습니다 —
+        <code>CRESTKCPIXSLTRM159SFRBATL</code>(전년 대비),
+        <code>CRESTKCPIXSLTRM679SFRBATL</code>(3개월 연율화). 경기침체 구간은
+        <code>USREC</code>(NBER 기준)입니다.
+      </li>
+      <li id="generated-note"></li>
+    </ul>
+  </section>
+
+</div>
+
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

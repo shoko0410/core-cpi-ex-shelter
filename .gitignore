@@ -1,0 +1,8 @@
+.env
+node_modules/
+
+# Raw API responses — a local speed-up only, always refetched in CI.
+data/.cache/
+
+# Browser-automation scratch output.
+.playwright-mcp/
