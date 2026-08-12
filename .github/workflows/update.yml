@@ -42,7 +42,9 @@ jobs:
           FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
           # Optional. Unset -> the script falls back to the keyless BLS v1 API.
           BLS_API_KEY: ${{ secrets.BLS_API_KEY }}
-        run: node scripts/fetch-data.mjs --fresh
+        # --strict: fail rather than commit a build that lost a series (e.g. an
+        # expired key silently dropping the sticky lines and recession bands).
+        run: node scripts/fetch-data.mjs --fresh --strict
 
       - name: Commit if the numbers changed
         run: |

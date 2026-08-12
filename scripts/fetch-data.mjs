@@ -23,6 +23,7 @@ import { fileURLToPath } from 'node:url';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const CACHE_DIR = path.join(ROOT, 'data', '.cache');
 const FRESH = process.argv.includes('--fresh');
+const STRICT = process.argv.includes('--strict');
 
 const START_YEAR = 1967; // CUUR0000SA0L12E begins 1967-01; nothing earlier exists.
 const END_YEAR = new Date().getUTCFullYear();
@@ -382,6 +383,35 @@ async function main() {
     },
   };
 
+  const jsonPath = path.join(ROOT, 'data', 'cpi.json');
+
+  // Locally, a missing FRED key just means the sticky lines and recession bands are
+  // absent. On a schedule that commits its own output, that same degradation would
+  // quietly publish a regression — so --strict makes it a failure instead. Compared
+  // against the previous build, it catches any cause: a missing key, a renamed
+  // series, an upstream outage.
+  if (STRICT) {
+    const problems = [];
+    if (!fredKey) problems.push('FRED_API_KEY is not set');
+    if (!recessions.length) problems.push('no recession bands came back (USREC)');
+    if (existsSync(jsonPath)) {
+      try {
+        const prev = JSON.parse(await readFile(jsonPath, 'utf8'));
+        for (const key of Object.keys(prev.series ?? {})) {
+          if (!series[key]) problems.push(`series "${key}" disappeared since the last build`);
+        }
+        if (months.length < (prev.months?.length ?? 0)) {
+          problems.push(`month count shrank: ${prev.months.length} -> ${months.length}`);
+        }
+      } catch {
+        // No readable previous build to compare against; the checks above still apply.
+      }
+    }
+    if (problems.length) {
+      throw new Error('--strict: refusing to write a degraded build\n  - ' + problems.join('\n  - '));
+    }
+  }
+
   await mkdir(path.join(ROOT, 'data'), { recursive: true });
   await mkdir(path.join(ROOT, 'public'), { recursive: true });
 
@@ -389,7 +419,6 @@ async function main() {
   // even when BLS published nothing. Compare everything *except* the timestamp and
   // reuse the old one when the numbers match, so a quiet day writes byte-identical
   // files and leaves no diff. generatedAt therefore means "data last changed".
-  const jsonPath = path.join(ROOT, 'data', 'cpi.json');
   const withoutStamp = (o) => JSON.stringify({ ...o, generatedAt: null });
   let unchanged = false;
   if (existsSync(jsonPath)) {
